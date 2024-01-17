@@ -1,4 +1,8 @@
 # Mardens Auth API
+The "Authentication Library Project" provides PHP and JavaScript  
+solutions for user authentication, including API interaction,  
+configuration, and detailed documentation.  
+EndFragment
 
 ## End-point: Login
 ### Authentication Endpoint
@@ -15,36 +19,9 @@ This API endpoint is used to authenticate users by sending a POST request to the
 
 - `success` (boolean) - Indicates whether the authentication was successful.
 - `message` (string) - Provides a message related to the authentication status.
-    
-
-#### Example Response
-
-``` json
-{
-    "success": true,
-    "message": "Logged in."
-}
-
- ```
-
-``` json
-{
-    "success": false,
-    "message": "Invalid username or password."
-}
-
- ```
-
-``` json
-{
-    "success": false,
-    "message": "Missing username or password."
-}
-
- ```
 ### Method: POST
 >```
->/auth.php
+>https://auth.mardens.com
 >```
 ### Body formdata
 
@@ -54,15 +31,7 @@ This API endpoint is used to authenticate users by sending a POST request to the
 |password|super_secret_password|text|
 
 
-### Response: 200
-```json
-{
-    "success": true,
-    "message": "Logged in."
-}
-```
-
-### Response: 200
+### Response: 400
 ```json
 {
     "success": false,
@@ -70,11 +39,20 @@ This API endpoint is used to authenticate users by sending a POST request to the
 }
 ```
 
-### Response: 200
+### Response: 400
 ```json
 {
     "success": false,
-    "message": "Missing username or password."
+    "message": "Invalid request."
+}
+```
+
+### Response: 200
+```json
+{
+    "success": true,
+    "message": "Logged in.",
+    "token": "<<TOKEN_HERE>>"
 }
 ```
 
@@ -82,34 +60,12 @@ This API endpoint is used to authenticate users by sending a POST request to the
 ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
 
 ## End-point: Login with Token
-This endpoint is used to authenticate a user via HTTP POST request to /auth.php. The request payload does not have a defined body type.
 
-### Response
+This HTTP POST request is used to authenticate a user by sending a payload to the specified endpoint. The request body type is not defined. Upon successful authentication, the response will include a JSON object with a "success" key set to true, and a "message" key providing additional information about the authentication status.
 
-- Status: 400
-- Body:
-    
-    ``` json
-      {
-          "success": true,
-          "message": ""
-      }
-    
-     ```
-    
-
-#### Example Response
-
-``` json
-{
-    "success": true,
-    "message": "Logged in with token."
-}
-
- ```
 ### Method: POST
 >```
->/auth.php
+>https://auth.mardens.com
 >```
 ### Headers
 
