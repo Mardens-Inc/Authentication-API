@@ -9,17 +9,17 @@ You can include the `authentication.js` file in your project either as a module 
 ### As a Module
 
 ```javascript
-import Authentication from 'https://auth.mardens.com/js/authentication.js';
+import Authentication from 'https://auth.mardens.com/';
 // or
-import Authentication from 'https://auth.mardens.com/js/authentication.min.js';
+import Authentication from 'https://auth.mardens.com/';
 ```
 
 ### As a Script Tag
 
 ```html
-<script src="https://auth.mardens.com/js/authentication.js"></script>
+<script src="https://auth.mardens.com/"></script>
 <!-- or -->
-<script src="https://auth.mardens.com/js/authentication.min.js"></script>
+<script src="https://auth.mardens.com/"></script>
 ```
 
 ## Usage
