@@ -1,8 +1,11 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] === "GET") {
-    header("Content-Type: text/html");
-    http_response_code(403);
-    die("<h1>Forbidden</h1> <p>You don't have permission to access this page.</p>");
+    header("Content-Type: text/javascript");
+    http_response_code(200);
+    if(isset($_GET["minified"])){
+        die(file_get_contents("js/authentication.min.js"));
+    }
+    die(file_get_contents("js/authentication.js"));
 }
 header("Content-Type: application/json");
 if ($_SERVER['REQUEST_METHOD'] === "POST") {
