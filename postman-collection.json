@@ -1,0 +1,412 @@
+{
+	"info": {
+		"_postman_id": "ca72da9a-9f88-4de3-9f0f-40f96ada1efa",
+		"name": "Mardens Auth API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16833182"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "username",
+							"value": "user123",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "super_secret_password",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/auth.php",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"auth.php"
+					]
+				},
+				"description": "### Authentication Endpoint\n\nThis API endpoint is used to authenticate users by sending a POST request to the specified URL.\n\n#### Request Body\n\n- `username` (text) - The username of the user.\n- `password` (text) - The password of the user.\n    \n\n#### Response\n\n- `success` (boolean) - Indicates whether the authentication was successful.\n- `message` (string) - Provides a message related to the authentication status.\n    \n\n#### Example Response\n\n``` json\n{\n    \"success\": true,\n    \"message\": \"Logged in.\"\n}\n\n ```\n\n``` json\n{\n    \"success\": false,\n    \"message\": \"Invalid username or password.\"\n}\n\n ```\n\n``` json\n{\n    \"success\": false,\n    \"message\": \"Missing username or password.\"\n}\n\n ```"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "username",
+									"value": "user123",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "super_secret_password",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/auth.php",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth.php"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Wed, 17 Jan 2024 17:55:05 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "PHP/8.2.12"
+						},
+						{
+							"key": "Set-Cookie",
+							"value": "token=eyJ1c2VybmFtZSI6ImRyZXcuY2hhc2UiLCJ0b2tlbiI6ImE3MDEzNTMzMjBjMzBjMzA4NzE1Mzc4ZWI5MzgxOWYxMWRkZWU4NTVkOGI2ODcwOGFjNmI2MzhkMDA1ZGFmZTcifQ%3D%3D; expires=Fri, 16 Feb 2024 17:55:05 GMT; Max-Age=2592000; path=/"
+						},
+						{
+							"key": "Content-Length",
+							"value": "39"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60, max=93"
+						},
+						{
+							"key": "Connection",
+							"value": "Keep-Alive"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"success\": true,\n    \"message\": \"Logged in.\"\n}"
+				},
+				{
+					"name": "Invalid Username or Password",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "username",
+									"value": "user123",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "super_secret_password",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/auth.php",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth.php"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Wed, 17 Jan 2024 17:57:41 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "PHP/8.2.12"
+						},
+						{
+							"key": "Content-Length",
+							"value": "59"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60, max=100"
+						},
+						{
+							"key": "Connection",
+							"value": "Keep-Alive"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"success\": false,\n    \"message\": \"Invalid username or password.\"\n}"
+				},
+				{
+					"name": "Missing Username or Password",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "username",
+									"value": "user123",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "super_secret_password",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/auth.php",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth.php"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Wed, 17 Jan 2024 17:58:07 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "PHP/8.2.12"
+						},
+						{
+							"key": "Content-Length",
+							"value": "59"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60, max=99"
+						},
+						{
+							"key": "Connection",
+							"value": "Keep-Alive"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"success\": false,\n    \"message\": \"Missing username or password.\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Login with Token",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "super_secret_token",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/auth.php",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"auth.php"
+					]
+				},
+				"description": "This endpoint is used to authenticate a user via HTTP POST request to {{url}}/auth.php. The request payload does not have a defined body type.\n\n### Response\n\n- Status: 400\n- Body:\n    \n    ``` json\n      {\n          \"success\": true,\n          \"message\": \"\"\n      }\n    \n     ```\n    \n\n#### Example Response\n\n``` json\n{\n    \"success\": true,\n    \"message\": \"Logged in with token.\"\n}\n\n ```"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJ1c2VybmFtZSI6ImRyZXcuY2hhc2UiLCJ0b2tlbiI6IjYyMjRlODE4M2I1ZDUxOTcxZjY4ZGM2ZTRhYTEzMDU5M2ViYmI4YTkxZDY1ODEzYWM2NDA2NDIwNjYzYTIxNDYifQ==",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/auth.php",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth.php"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Wed, 17 Jan 2024 18:33:11 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "PHP/8.2.12"
+						},
+						{
+							"key": "Content-Length",
+							"value": "50"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60, max=95"
+						},
+						{
+							"key": "Connection",
+							"value": "Keep-Alive"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"success\": true,\n    \"message\": \"Logged in with token.\"\n}"
+				},
+				{
+					"name": "Invalid Token",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJ1c2VybmFtZSI6ImRyZXcuY2hhc2UiLCJ0b2tlbiI6IjYyMjRlODE4M2I1ZDUxOTcxZjY4ZGM2ZTRhYTEzMDU5M2ViYmI4YTkxZDY1ODEzYWM2NDA2NDIwNjYzYTIxNDYifQ==c",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/auth.php",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth.php"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Wed, 17 Jan 2024 18:34:36 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "PHP/8.2.12"
+						},
+						{
+							"key": "Content-Length",
+							"value": "44"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"success\": false,\n    \"message\": \"Invalid token.\"\n}"
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "http://auth.local",
+			"type": "string"
+		}
+	]
+}
