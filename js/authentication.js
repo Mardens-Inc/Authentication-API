@@ -10,6 +10,10 @@ export default class Authentication {
     constructor(debug = false) {
         // Set the API URL based on the debug parameter
         this.apiUrl = debug ? "http://auth.local/" : "https://auth.mardens.com/";
+        if(!window.$)
+        {
+            throw new Error("jQuery is required for this library to work.");
+        }
     }
 
     /**
