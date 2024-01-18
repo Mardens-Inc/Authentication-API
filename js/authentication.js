@@ -10,8 +10,17 @@ export default class Authentication {
     constructor(debug = false) {
         // Set the API URL based on the debug parameter
         this.apiUrl = debug ? "http://auth.local/" : "https://auth.mardens.com/";
-        if(!window.$)
-        {
+        this.debugMode = debug;
+        try {
+            this.token = document.cookie
+                .split(";")
+                .find((row) => row.trim().startsWith("token="))
+                .trim()
+                .slice(6);
+        } catch (e) {
+            this.token = null;
+        }
+        if (!window.$) {
             throw new Error("jQuery is required for this library to work.");
         }
     }
@@ -20,7 +29,7 @@ export default class Authentication {
      * Login with a username and password.
      * @param {string} username - The username to login with.
      * @param {string} password - The password to login with.
-     * @return {JSON} The server's response as a JSON object.
+     * @return {Promise<JSON>} The server's response as a JSON object.
      */
     async login(username, password) {
         // Send a POST request to the API with the username and password
@@ -31,6 +40,9 @@ export default class Authentication {
             data: { username, password },
             success: (data) => {
                 // Return the data from the server on successful request
+                if (data.success && data.token) {
+                    this.generateCookies(data.token);
+                }
                 return data;
             },
             error: (err) => {
@@ -43,7 +55,7 @@ export default class Authentication {
     /**
      * Login with a token.
      * @param {string} token - The token to login with.
-     * @return {JSON} The server's response as a JSON object.
+     * @return {Promise<JSON>} The server's response as a JSON object.
      */
     async loginWithToken(token) {
         // Send a POST request to the API with the token in the Authorization header
@@ -54,6 +66,9 @@ export default class Authentication {
             headers: { Authorization: token },
             success: (data) => {
                 // Return the data from the server on successful request
+                if (data.success) {
+                    this.generateCookies(token); // Extend the cookies expiration
+                }
                 return data;
             },
             error: (err) => {
@@ -65,22 +80,19 @@ export default class Authentication {
 
     /**
      * Login with a token stored in a cookie.
-     * @return {JSON} The server's response.
+     * @return {Promise<JSON>} The server's response.
      */
     async loginWithTokenFromCookie() {
-        // Send a POST request to the API with the token in the Authorization header
-        return await $.ajax({
-            url: this.apiUrl,
-            method: "POST",
-            dataType: "json",
-            success: (data) => {
-                // Return the data from the server on successful request
-                return data;
-            },
-            error: (err) => {
-                // Return false on error
-                return err;
-            },
-        });
+        return this.token == null ? false : await this.loginWithToken(this.token);
+    }
+
+    logout() {
+        document.cookie = `token=; path=/; domain=.${window.location.hostname}; samesite=strict; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    }
+
+    generateCookies(token) {
+        let expire = new Date();
+        expire.setDate(expire.getDate() + 2); // 2 days
+        document.cookie = `token=${token}; path=/; domain=.${window.location.hostname}; samesite=strict; expires=${expire.toGMTString()}`;
     }
 }
