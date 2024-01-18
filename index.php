@@ -1,13 +1,10 @@
 <?php
-header("Allow Access-Control-Allow-Origin: *");
-header("Allow Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Allow Access-Control-Allow-Headers: Authorization, Content-Type");
-header("Allow Access-Control-Max-Age: 86400");
-
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: *");
 if ($_SERVER['REQUEST_METHOD'] === "GET") {
     header("Content-Type: text/javascript");
     http_response_code(200);
-    if(isset($_GET["minified"])){
+    if (isset($_GET["minified"])) {
         die(file_get_contents("js/authentication.min.js"));
     }
     die(file_get_contents("js/authentication.js"));
