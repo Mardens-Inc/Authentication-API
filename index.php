@@ -1,4 +1,9 @@
 <?php
+header("Allow Access-Control-Allow-Origin: *");
+header("Allow Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Allow Access-Control-Allow-Headers: Authorization, Content-Type");
+header("Allow Access-Control-Max-Age: 86400");
+
 if ($_SERVER['REQUEST_METHOD'] === "GET") {
     header("Content-Type: text/javascript");
     http_response_code(200);
