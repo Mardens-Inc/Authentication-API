@@ -1,6 +1,8 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: *");
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: Authorization');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+
 if ($_SERVER['REQUEST_METHOD'] === "GET") {
     header("Content-Type: text/javascript");
     http_response_code(200);
@@ -8,13 +10,13 @@ if ($_SERVER['REQUEST_METHOD'] === "GET") {
         die(file_get_contents("js/authentication.min.js"));
     }
     die(file_get_contents("js/authentication.js"));
-}
-header("Content-Type: application/json");
-if ($_SERVER['REQUEST_METHOD'] === "POST") {
+} else if ($_SERVER['REQUEST_METHOD'] === "POST") {
+    header("Content-Type: application/json");
     require_once "inc/Authentication.inc.php";
     $auth = new Authentication();
 
     $headers = apache_request_headers();
+
 
     if (isset($_POST['username']) && isset($_POST['password'])) {
         $username = $_POST['username'];
@@ -32,13 +34,17 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : $headers["Authorization"];
         if ($auth->loginWithToken($token)) {
             http_response_code(200);
-            die(json_encode(["success" => true, "message" => "Logged in with token."]));
+            die(json_encode(["success" => true, "message" => "Logged in with token.", "token" => $token]));
         } else {
             http_response_code(400);
             die(json_encode(["success" => false, "message" => "Invalid token."]));
         }
     }
+} else if ($_SERVER['REQUEST_METHOD'] === "OPTIONS") {
+    http_response_code(200);
+    die();
+} else {
+    header("Content-Type: application/json");
+    http_response_code(400);
+    die(json_encode(["success" => false, "message" => "Invalid request."]));
 }
-
-http_response_code(400);
-die(json_encode(["success" => false, "message" => "Invalid request."]));
