@@ -64,10 +64,19 @@ export default class Authentication {
      * @return {JSON|boolean} The server's response, or false if no token was found.
      */
     async loginWithTokenFromCookie() {
-        const token = document.cookie.filter((cookie) => {
-            return cookie.includes("token");
+        // Send a POST request to the API with the token in the Authorization header
+        return await $.ajax({
+            url: this.apiUrl,
+            method: "POST",
+            dataType: "json",
+            success: (data) => {
+                // Return the data from the server on successful request
+                return data;
+            },
+            error: (err) => {
+                // Return false on error
+                return false;
+            },
         });
-        if(token.length === 0) return false;
-        return await this.loginWithToken(token);
     }
 }
