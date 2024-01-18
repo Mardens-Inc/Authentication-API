@@ -20,7 +20,7 @@ export default class Authentication {
      * Login with a username and password.
      * @param {string} username - The username to login with.
      * @param {string} password - The password to login with.
-     * @return {JSON|boolean} The server's response as a JSON object, or false if the login failed.
+     * @return {JSON} The server's response as a JSON object.
      */
     async login(username, password) {
         // Send a POST request to the API with the username and password
@@ -35,7 +35,7 @@ export default class Authentication {
             },
             error: (err) => {
                 // Return false on error
-                return false;
+                return err;
             },
         });
     }
@@ -43,7 +43,7 @@ export default class Authentication {
     /**
      * Login with a token.
      * @param {string} token - The token to login with.
-     * @return {JSON|boolean} The server's response as a JSON object, or false if the login failed.
+     * @return {JSON} The server's response as a JSON object.
      */
     async loginWithToken(token) {
         // Send a POST request to the API with the token in the Authorization header
@@ -58,14 +58,14 @@ export default class Authentication {
             },
             error: (err) => {
                 // Return false on error
-                return false;
+                return err;
             },
         });
     }
 
     /**
      * Login with a token stored in a cookie.
-     * @return {JSON|boolean} The server's response, or false if no token was found.
+     * @return {JSON} The server's response.
      */
     async loginWithTokenFromCookie() {
         // Send a POST request to the API with the token in the Authorization header
@@ -79,7 +79,7 @@ export default class Authentication {
             },
             error: (err) => {
                 // Return false on error
-                return false;
+                return err;
             },
         });
     }
