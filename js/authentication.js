@@ -63,7 +63,7 @@ export default class Authentication {
             url: this.apiUrl,
             method: "POST",
             dataType: "json",
-            headers: { Authorization: token },
+            data: { token },
             success: (data) => {
                 // Return the data from the server on successful request
                 if (data.success) {
