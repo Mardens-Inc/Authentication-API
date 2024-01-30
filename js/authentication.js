@@ -46,6 +46,7 @@ export default class Authentication {
                 return data;
             },
             error: (err) => {
+                $(this).trigger("error", [err]);
                 // Return false on error
                 return err;
             },
@@ -72,6 +73,7 @@ export default class Authentication {
                 return data;
             },
             error: (err) => {
+                $(this).trigger("error", [err]);
                 // Return false on error
                 return err;
             },
