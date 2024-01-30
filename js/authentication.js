@@ -57,6 +57,9 @@ export default class Authentication {
                 return data;
             },
             error: (err) => {
+                if (err.message !== undefined) err = {success: false, message: err.message};
+                else err = {success: false, message: "An unknown error occurred."};
+
                 $(this).trigger("error", [err]);
                 // Return false on error
                 return err;
@@ -84,6 +87,9 @@ export default class Authentication {
                 return data;
             },
             error: (err) => {
+                if (err.message !== undefined) err = {success: false, message: err.message};
+                else err = {success: false, message: "An unknown error occurred."};
+
                 $(this).trigger("error", [err]);
                 // Return false on error
                 return err;
