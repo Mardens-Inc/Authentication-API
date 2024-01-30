@@ -37,7 +37,7 @@ export default class Authentication {
             url: this.apiUrl,
             method: "POST",
             dataType: "json",
-            data: { username, password },
+            data: {username, password},
             success: (data) => {
                 // Return the data from the server on successful request
                 if (data.success && data.token) {
@@ -63,7 +63,7 @@ export default class Authentication {
             url: this.apiUrl,
             method: "POST",
             dataType: "json",
-            data: { token },
+            data: {token},
             success: (data) => {
                 // Return the data from the server on successful request
                 if (data.success) {
@@ -86,13 +86,23 @@ export default class Authentication {
         return this.token == null ? false : await this.loginWithToken(this.token);
     }
 
+    /**
+     * Logout of the current session.
+     */
     logout() {
         document.cookie = `token=; path=/; domain=.${window.location.hostname}; samesite=strict; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        $(this).trigger("logout");
     }
 
+    /**
+     * Generate cookies for the token.
+     * @param {string} token - The token to generate cookies for.
+     */
     generateCookies(token) {
         let expire = new Date();
         expire.setDate(expire.getDate() + 2); // 2 days
         document.cookie = `token=${token}; path=/; domain=.${window.location.hostname}; samesite=strict; expires=${expire.toGMTString()}`;
+        this.token = token;
+        $(this).trigger("login");
     }
 }
