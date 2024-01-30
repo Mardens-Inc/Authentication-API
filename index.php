@@ -3,20 +3,27 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Authorization');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 
-if ($_SERVER['REQUEST_METHOD'] === "GET") {
+
+if ($_SERVER['REQUEST_METHOD'] === "GET" || $_SERVER['REQUEST_METHOD'] === "HEAD") {
+
+    if (isset($_GET["time"])) {
+        header("Content-Type: text/plaintext");
+        http_response_code(200);
+        print_r(filemtime("js/authentication.js"));
+        die();
+    }
+
     header("Content-Type: text/javascript");
     http_response_code(200);
     if (isset($_GET["minified"])) {
         die(file_get_contents("js/authentication.min.js"));
     }
     die(file_get_contents("js/authentication.js"));
-} else if ($_SERVER['REQUEST_METHOD'] === "POST") {
+}
+if ($_SERVER['REQUEST_METHOD'] === "POST") {
     header("Content-Type: application/json");
     require_once "inc/Authentication.inc.php";
     $auth = new Authentication();
-
-    $headers = apache_request_headers();
-
 
     if (isset($_POST['username']) && isset($_POST['password'])) {
         $username = $_POST['username'];
@@ -30,8 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === "GET") {
             http_response_code(400);
             die(json_encode(["success" => false, "message" => "Invalid username or password."]));
         }
-    } else if (isset($_COOKIE['token']) || isset($headers["Authorization"])) {
-        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : $headers["Authorization"];
+    } else if (isset($_POST['token'])) {
+        $token = $_POST['token'];
         if ($auth->loginWithToken($token)) {
             http_response_code(200);
             die(json_encode(["success" => true, "message" => "Logged in with token.", "token" => $token]));
@@ -42,6 +49,9 @@ if ($_SERVER['REQUEST_METHOD'] === "GET") {
     }
 } else if ($_SERVER['REQUEST_METHOD'] === "OPTIONS") {
     http_response_code(200);
+    header('Access-Control-Allow-Headers: x-requested-with');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+    header('Access-Control-Max-Age: 604800');
     die();
 } else {
     header("Content-Type: application/json");
