@@ -11,6 +11,17 @@ export default class Authentication {
         // Set the API URL based on the debug parameter
         this.apiUrl = debug ? "http://auth.local/" : "https://auth.mardens.com/";
         this.debugMode = debug;
+
+        // Set the initial login state
+        this.isLoggedIn = false;
+        $(this).on("login", () => {
+            this.isLoggedIn = true;
+        });
+        $(this).on("logout", () => {
+            this.isLoggedIn = false;
+        });
+
+        // Get the token from the cookie
         try {
             this.token = document.cookie
                 .split(";")
