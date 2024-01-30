@@ -1,8 +1,10 @@
 <?php
+
 class Authentication
 {
 
     private mysqli $conn;
+
     function __construct()
     {
         require_once "connections.inc.php";
@@ -64,6 +66,8 @@ class Authentication
         }
     }
 
+
+
     public function loginWithToken(string $token): bool
     {
         // decode uri component
@@ -122,5 +126,58 @@ class Authentication
     {
         $valid = hash_equals(self::generateToken($username, $password, $ip, $user_agent), $token);
         return $valid;
+    }
+
+    /**
+     * Retrieves the user's information from Active Directory.
+     *
+     * @param string $username The username of the user.
+     * @param string $password The password of the user.
+     *
+     * @return array|false Returns an array with the user's details if the authentication is successful.
+     *                    Returns false if the authentication fails or if unable to connect to Active Directory.
+     */
+    public function getUserInfo(string $username, string $password): array|false
+    {
+        // Active Directory server details
+        $ldapServer = "ldap://192.168.21.215";
+        $ldapUsername = $username . "@mss.local"; // Use the user's full AD username
+        // Connect to Active Directory
+        $ldapConn = ldap_connect($ldapServer);
+        ldap_set_option($ldapConn, LDAP_OPT_PROTOCOL_VERSION, 3);
+        ldap_set_option($ldapConn, LDAP_OPT_REFERRALS, 0);
+
+        if ($ldapConn) {
+            try {
+                // Bind to Active Directory using the provided username and password
+                $ldapBind = @ldap_bind($ldapConn, $ldapUsername, $password);
+            } catch (Exception $e) {
+                $ldapBind = false;
+            }
+
+            if ($ldapBind) {
+                // Search AD for the user's details
+                $searchFilter = "(samaccountname=$username)";
+                $searchAttributes = array("displayName", "mail", "memberOf"); // Add or remove required attributes
+                $searchResults = ldap_search($ldapConn, "DC=mss,DC=local", $searchFilter, $searchAttributes);
+                $userDetails = [];
+
+                if($searchResults) {
+                    $entry = ldap_first_entry($ldapConn, $searchResults);
+                    $userDetails = ldap_get_attributes($ldapConn, $entry); // This will contain user's details
+                    unset($userDetails["count"]); // Remove the 'count' element from the results
+                }
+
+                ldap_unbind($ldapConn);
+                return $userDetails; // Convert array to JSON and return
+            } else {
+                // Authentication failed
+                ldap_unbind($ldapConn);
+                return false;
+            }
+        } else {
+            // Unable to connect to Active Directory
+            return false;
+        }
     }
 }
