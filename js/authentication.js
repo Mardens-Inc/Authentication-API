@@ -16,7 +16,7 @@ export default class Authentication {
         // Set the initial login state
         this.isLoggedIn = false;
         if (this.hasJQuery) {
-            $(this).on("login", () => {
+            $(this).on("logged-in", () => {
                 this.isLoggedIn = true;
             });
             $(this).on("logout", () => {
@@ -137,6 +137,7 @@ export default class Authentication {
         document.cookie = `token=; path=/; domain=.${window.location.hostname}; samesite=strict; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
         if (this.hasJQuery)
             $(this).trigger("logout");
+        this.isLoggedIn = false;
     }
 
     /**
@@ -148,7 +149,8 @@ export default class Authentication {
         expire.setDate(expire.getDate() + 2); // 2 days
         document.cookie = `token=${token}; path=/; domain=.${window.location.hostname}; samesite=strict; expires=${expire.toGMTString()}`;
         this.token = token;
+        this.isLoggedIn = true;
         if (this.hasJQuery)
-            $(this).trigger("login");
+            $(this).trigger("logged-in");
     }
 }
