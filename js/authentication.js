@@ -47,18 +47,15 @@ export default class Authentication {
         const apiURL = this.apiUrl;
 
         let response, data;
+        const formData = new FormData();
+        formData.append("username", username);
+        formData.append("password", password);
 
         try {
             // Make a POST request to the API
             response = await fetch(apiURL, {
                 method: 'POST',
-                header: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    username: username,
-                    password: password
-                }),
+                body: formData,
             });
 
             // Try to get data from the response in JSON format
@@ -88,19 +85,20 @@ export default class Authentication {
      * @return {Promise<JSON>} The server's response as a JSON object.
      */
     async loginWithToken(token) {
+
+
+        const formData = new FormData();
+        formData.append("token", token);
+
         // Send a POST request to the API with the token in the Authorization header
         try {
             const response = await fetch(this.apiUrl, {
                 method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({token}),
+                body: formData,
             });
 
             // assuming server always sends valid json in response
             const data = await response.json();
-
 
             if (response.ok) {
                 // The request was handled successfully
