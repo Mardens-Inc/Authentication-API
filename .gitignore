@@ -1,3 +1,5 @@
 *.log
 db-config.json
 /.idea/
+/vendor/
+composer.lock
