@@ -1,60 +1,70 @@
 <?php
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: Authorization');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Factory\AppFactory;
 
+require __DIR__ . '/vendor/autoload.php';
 
-if ($_SERVER['REQUEST_METHOD'] === "GET" || $_SERVER['REQUEST_METHOD'] === "HEAD") {
+$app = AppFactory::create();
 
-    if (isset($_GET["time"])) {
-        header("Content-Type: text/plaintext");
-        http_response_code(200);
-        print_r(filemtime("js/authentication.js"));
-        die();
+// Allow Cross Origin Requests (CORS)
+$app->options('/{routes:.+}', function (Request $request, Response $response) {
+    return $response;
+});
+
+$app->add(function (Request $request, RequestHandler $handler): Response {
+    $response = $handler->handle($request);
+    return $response
+        ->withHeader('Access-Control-Allow-Origin', '*')
+        ->withHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+});
+
+$app->get('/', function (Request $request, Response $response, $args) {
+    $queryParams = $request->getQueryParams();
+    if (isset($queryParams["time"])) {
+        $time = filemtime("js/authentication.js");
+        $response->getBody()->write($time);
+        return $response->withHeader('Content-Type', 'text/plain');
+    } else {
+        $jsFile = isset($queryParams["minified"]) ? "js/authentication.min.js" : "js/authentication.js";
+        $response->getBody()->write(file_get_contents($jsFile));
+        return $response->withHeader('Content-Type', 'application/javascript');
     }
+});
 
-    header("Content-Type: text/javascript");
-    http_response_code(200);
-    if (isset($_GET["minified"])) {
-        die(file_get_contents("js/authentication.min.js"));
-    }
-    die(file_get_contents("js/authentication.js"));
-}
-if ($_SERVER['REQUEST_METHOD'] === "POST") {
-    header("Content-Type: application/json");
+$app->get("/js/time", function (Request $request, Response $response, $args) {
+    $time = filemtime("js/authentication.js");
+    $response->getBody()->write($time);
+    return $response->withHeader('Content-Type', 'text/plain');
+});
+
+$app->get("/js/minified", function (Request $request, Response $response, $args) {
+    $response->getBody()->write(file_get_contents("js/authentication.min.js"));
+    return $response->withHeader('Content-Type', 'application/javascript');
+});
+
+$app->post('/', function (Request $request, Response $response, $args) {
     require_once "inc/Authentication.inc.php";
     $auth = new Authentication();
+    $params = (array)$request->getParsedBody();
 
-    if (isset($_POST['username']) && isset($_POST['password'])) {
-        $username = $_POST['username'];
-        $password = $_POST['password'];
-        $token = $auth->login($username, $password);
-        if ($token) {
-            setcookie("token", $token, time() + (86400 * 30), "/");
-            http_response_code(200);
-            die(json_encode(["success" => true, "message" => "Logged in.", "token" => $token]));
-        } else {
-            http_response_code(400);
-            die(json_encode(["success" => false, "message" => "Invalid username or password."]));
-        }
-    } else if (isset($_POST['token'])) {
-        $token = $_POST['token'];
-        if ($auth->loginWithToken($token)) {
-            http_response_code(200);
-            die(json_encode(["success" => true, "message" => "Logged in with token.", "token" => $token]));
-        } else {
-            http_response_code(400);
-            die(json_encode(["success" => false, "message" => "Invalid token."]));
-        }
+    if (isset($params['username'], $params['password'])) {
+        $token = $auth->login($params['username'], $params['password']);
+    } elseif (isset($params['token'])) {
+        $token = $auth->loginWithToken($params['token']);
     }
-} else if ($_SERVER['REQUEST_METHOD'] === "OPTIONS") {
-    http_response_code(200);
-    header('Access-Control-Allow-Headers: x-requested-with');
-    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-    header('Access-Control-Max-Age: 604800');
-    die();
-} else {
-    header("Content-Type: application/json");
-    http_response_code(400);
-    die(json_encode(["success" => false, "message" => "Invalid request."]));
-}
+
+    if(!empty($token)) {
+        setcookie("token", $token, time() + (86400 * 30), "/");
+        $response->getBody()->write(json_encode(["success" => true, "message" => isset($params['username']) ? "Logged in." : "Logged in with token.", "token" => $token]));
+    } else {
+        $message = isset($params['username']) ? "Invalid username or password." : "Invalid token.";
+        $response->getBody()->write(json_encode(["success" => false, "message" => $message]));
+        return $response->withStatus(400);
+    }
+
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
+$app->run();
