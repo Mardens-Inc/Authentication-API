@@ -56,9 +56,11 @@ $app->post('/', function (Request $request, Response $response, $args) {
     $auth = new Authentication();
     $params = (array)$request->getParsedBody();
 
+    $token = "";
+
     if (isset($params['username'], $params['password'])) {
         $token = $auth->login($params['username'], $params['password']);
-    } elseif (isset($params['token'])) {
+    } else if (isset($params['token'])) {
         $token = $auth->loginWithToken($params['token']);
     }
 
@@ -68,10 +70,10 @@ $app->post('/', function (Request $request, Response $response, $args) {
     } else {
         $message = isset($params['username']) ? "Invalid username or password." : "Invalid token.";
         $response->getBody()->write(json_encode(["success" => false, "message" => $message]));
-        return $response->withStatus(400);
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
     }
 
-    return $response->withHeader('Content-Type', 'application/json');
+    return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
 });
 
 $app->run();
