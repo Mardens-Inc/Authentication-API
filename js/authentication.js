@@ -9,17 +9,20 @@ export default class Authentication {
      */
     constructor(debug = false) {
         // Set the API URL based on the debug parameter
-        this.apiUrl = debug ? "http://auth.local/" : "https://auth.mardens.com/";
+        this.apiUrl = debug ? "http://auth.local/" : "https://lib.mardens.com/auth/";
         this.debugMode = debug;
+        this.hasJQuery = window.$ !== undefined;
 
         // Set the initial login state
         this.isLoggedIn = false;
-        $(this).on("login", () => {
-            this.isLoggedIn = true;
-        });
-        $(this).on("logout", () => {
-            this.isLoggedIn = false;
-        });
+        if (this.hasJQuery) {
+            $(this).on("login", () => {
+                this.isLoggedIn = true;
+            });
+            $(this).on("logout", () => {
+                this.isLoggedIn = false;
+            });
+        }
 
         // Get the token from the cookie
         try {
@@ -31,9 +34,6 @@ export default class Authentication {
         } catch (e) {
             this.token = null;
         }
-        if (!window.$) {
-            throw new Error("jQuery is required for this library to work.");
-        }
     }
 
     /**
@@ -44,27 +44,42 @@ export default class Authentication {
      */
     async login(username, password) {
         // Send a POST request to the API with the username and password
-        return await $.ajax({
-            url: this.apiUrl,
-            method: "POST",
-            dataType: "json",
-            data: {username, password},
-            success: (data) => {
-                // Return the data from the server on successful request
-                if (data.success && data.token) {
-                    this.generateCookies(data.token);
-                }
-                return data;
-            },
-            error: (err) => {
-                if (err.message !== undefined) err = {success: false, message: err.message};
-                else err = {success: false, message: "An unknown error occurred."};
+        const apiURL = this.apiUrl;
 
-                $(this).trigger("error", [err]);
-                // Return false on error
-                return err;
-            },
-        });
+        let response, data;
+
+        try {
+            // Make a POST request to the API
+            response = await fetch(apiURL, {
+                method: 'POST',
+                header: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                }),
+            });
+
+            // Try to get data from the response in JSON format
+            data = await response.json();
+        } catch (err) {
+            if (this.hasJQuery)
+                // An error occurred, trigger the error event
+                $(this).trigger("error", [{success: false, message: "An unknown error occurred."}]);
+            return err;
+        }
+
+        // Check if the request was successful
+        if (data.success && data.token) {
+            this.generateCookies(data.token);
+            return data;
+        } else {
+            if (this.hasJQuery)
+                // The request was not successful, trigger the error event
+                $(this).trigger("error", [{success: false, message: data.message}]);
+            return data;
+        }
     }
 
     /**
@@ -74,27 +89,39 @@ export default class Authentication {
      */
     async loginWithToken(token) {
         // Send a POST request to the API with the token in the Authorization header
-        return await $.ajax({
-            url: this.apiUrl,
-            method: "POST",
-            dataType: "json",
-            data: {token},
-            success: (data) => {
-                // Return the data from the server on successful request
-                if (data.success) {
-                    this.generateCookies(token); // Extend the cookies expiration
-                }
-                return data;
-            },
-            error: (err) => {
-                if (err.message !== undefined) err = {success: false, message: err.message};
-                else err = {success: false, message: "An unknown error occurred."};
+        try {
+            const response = await fetch(this.apiUrl, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({token}),
+            });
 
-                $(this).trigger("error", [err]);
-                // Return false on error
-                return err;
-            },
-        });
+            // assuming server always sends valid json in response
+            const data = await response.json();
+
+
+            if (response.ok) {
+                // The request was handled successfully
+                if (data.success) {
+                    this.generateCookies(token);
+                }
+            } else {
+                // The request was handled with an error
+                if (!data.message) {
+                    data.message = "An unknown error occurred.";
+                }
+                // here you have to take care of "trigger" replacement as 'fetch' doesn't support it
+                throw new Error(JSON.stringify(data));
+            }
+
+            return data;
+        } catch (error) {
+            // handle error if fetch throws an exception
+            console.error(error);
+            throw error;
+        }
     }
 
     /**
@@ -110,7 +137,8 @@ export default class Authentication {
      */
     logout() {
         document.cookie = `token=; path=/; domain=.${window.location.hostname}; samesite=strict; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-        $(this).trigger("logout");
+        if (this.hasJQuery)
+            $(this).trigger("logout");
     }
 
     /**
@@ -122,6 +150,7 @@ export default class Authentication {
         expire.setDate(expire.getDate() + 2); // 2 days
         document.cookie = `token=${token}; path=/; domain=.${window.location.hostname}; samesite=strict; expires=${expire.toGMTString()}`;
         this.token = token;
-        $(this).trigger("login");
+        if (this.hasJQuery)
+            $(this).trigger("login");
     }
 }
