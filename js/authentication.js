@@ -136,7 +136,7 @@ export default class Authentication {
     logout() {
         document.cookie = `token=; path=/; domain=.${window.location.hostname}; samesite=strict; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
         if (this.hasJQuery)
-            $(this).trigger("logout");
+            $(this).trigger("log-out");
         this.isLoggedIn = false;
     }
 
