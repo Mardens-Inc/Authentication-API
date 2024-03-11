@@ -56,7 +56,7 @@ $app->post("/profile", function (Request $request, Response $response, $args) {
     $auth = new Authentication();
     $params = (array)$request->getParsedBody();
     if(!isset($params["username"]) || !isset($params["password"])) {
-        $response->getBody()->write(json_encode(["success" => false, "message" => "Invalid username or password."]));
+        $response->getBody()->write(json_encode(["success" => false, "message" => "Missing username or password."]));
         return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
     }
     $username = @$params['username'];
@@ -71,7 +71,7 @@ $app->post("/profile", function (Request $request, Response $response, $args) {
             return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
         }
     } catch (Exception $e) {
-        $response->getBody()->write(json_encode(["success" => false, "message" => "Invalid username or password.", "error" => $e->getMessage()]));
+        $response->getBody()->write(json_encode(["success" => false, "message" => "Failed to make request.", "error" => $e->getMessage()]));
         return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
     }
 });
