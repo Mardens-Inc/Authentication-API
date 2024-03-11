@@ -9,7 +9,7 @@ export default class Authentication {
      */
     constructor(debug = false) {
         // Set the API URL based on the debug parameter
-        this.apiUrl = debug ? "http://auth.local/" : "https://lib.mardens.com/auth/";
+        this.apiUrl = debug ? "http://auth.local/auth/" : "https://lib.mardens.com/auth/";
         this.debugMode = debug;
         this.hasJQuery = window.$ !== undefined;
 
@@ -50,7 +50,7 @@ export default class Authentication {
         const formData = new FormData();
         formData.append("username", username);
         formData.append("password", password);
-
+        this.userData = await this.getUserInfo(username, password);
         try {
             // Make a POST request to the API
             response = await fetch(apiURL, {
@@ -153,4 +153,36 @@ export default class Authentication {
         if (this.hasJQuery)
             $(this).trigger("logged-in");
     }
+
+    /**
+     * Returns the profile information of a user.
+     * @param {string} username - The username of the user.
+     * @param {string} password - The password of the user.
+     * @returns {Promise<Object>} - A promise that resolves to an object containing the user's profile information.
+     */
+    async getUserInfo(username, password) {
+        const formData = new FormData();
+        formData.append("username", username);
+        formData.append("username", password);
+
+        let response = await fetch(`${this.apiUrl}/profile`, {
+            method: "GET",
+            headers: {"accept": "application/json"},
+            body: formData
+
+        });
+        const json = await response.json();
+        window.localStorage.setItem("user", JSON.stringify(json));
+        return json;
+    }
+
+    /**
+     * Retrieves the stored user information from the local storage.
+     *
+     * @returns {Object|null} The stored user information as parsed object, or null if no user information is found.
+     */
+    getStoredUserInfo() {
+        return JSON.parse(window.localStorage.getItem("user"));
+    }
+
 }
