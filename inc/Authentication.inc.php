@@ -67,7 +67,6 @@ class Authentication
     }
 
 
-
     public function loginWithToken(string $token): bool
     {
         // decode uri component
@@ -158,17 +157,53 @@ class Authentication
             if ($ldapBind) {
                 // Search AD for the user's details
                 $searchFilter = "(samaccountname=$username)";
-                $searchAttributes = array("displayName", "mail", "memberOf"); // Add or remove required attributes
+                $searchAttributes = array("displayName", "mail", "memberOf");
                 $searchResults = ldap_search($ldapConn, "DC=mss,DC=local", $searchFilter, $searchAttributes);
                 $userDetails = [];
 
-                if($searchResults) {
+                if ($searchResults) {
                     $entry = ldap_first_entry($ldapConn, $searchResults);
                     $userDetails = ldap_get_attributes($ldapConn, $entry); // This will contain user's details
                     unset($userDetails["count"]); // Remove the 'count' element from the results
                 }
 
                 ldap_unbind($ldapConn);
+
+                $userDetails["displayName"] = @$userDetails["displayName"][0];
+                $userDetails["mail"] = @$userDetails["mail"][0];
+                unset($userDetails["0"]);
+                unset($userDetails["1"]);
+                unset($userDetails["2"]);
+
+                // loop through the memberOf array and remove the count element and format the array
+                $memberOf = [];
+                foreach ($userDetails["memberOf"] as $key => $group) {
+                    if ($key !== "count") {
+                        $groupData = explode(",", $group);
+                        $groupSize = count($groupData);
+                        $groupDetails = [];
+                        for ($i = 0; $i < $groupSize; $i++) {
+                            $groupParts = explode("=", $groupData[$i]);
+                            $groupKey = $groupParts[0];
+                            $groupValue = $groupParts[1] ?? null; // prevent errors when there's no second element
+                            switch ($groupKey) {
+                                case "CN":
+                                    $groupDetails["Group"] = $groupValue;
+                                    break;
+                                case "OU":
+                                    $groupDetails["Permissions"] = $groupValue;
+                                    break;
+                                case "DC":
+                                    $dcs = explode(".", $groupValue);
+                                    $groupDetails["DomainControllers"] = $dcs;
+                                    break;
+                            }
+                        }
+                        $memberOf[$key] = $groupDetails;
+                    }
+                }
+                $userDetails["memberOf"] = $memberOf;
+
                 return $userDetails; // Convert array to JSON and return
             } else {
                 // Authentication failed
