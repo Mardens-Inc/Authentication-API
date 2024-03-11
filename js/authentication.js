@@ -166,7 +166,7 @@ export default class Authentication {
         formData.append("username", password);
 
         let response = await fetch(`${this.apiUrl}/profile`, {
-            method: "GET",
+            method: "POST",
             headers: {"accept": "application/json"},
             body: formData
 
