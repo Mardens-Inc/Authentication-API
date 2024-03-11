@@ -161,16 +161,22 @@ export default class Authentication {
      * @returns {Promise<Object>} - A promise that resolves to an object containing the user's profile information.
      */
     async getUserInfo(username, password) {
+        const myHeaders = new Headers();
+        myHeaders.append("Accept", "application/json");
+
         const formData = new FormData();
         formData.append("username", username);
-        formData.append("username", password);
+        formData.append("password", password);
 
-        let response = await fetch(`${this.apiUrl}profile`, {
+        const requestOptions = {
             method: "POST",
-            headers: {"accept": "application/json"},
-            body: formData
+            headers: myHeaders,
+            body: formData,
+            redirect: "follow"
+        };
 
-        });
+        const response = await fetch(`${this.apiUrl}profile`, requestOptions)
+
         const json = await response.json();
         window.localStorage.setItem("user", JSON.stringify(json));
         return json;
