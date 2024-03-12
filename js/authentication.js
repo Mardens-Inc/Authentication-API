@@ -1,4 +1,11 @@
 /**
+ * @typedef {Object} UserProfile
+ * @property {string} username - The username of the user.
+ * @property {boolean} admin - If the user is an admin.
+ * @property {string} token - The token of the user.
+ */
+
+/**
  * Authentication class for interacting with the authentication API.
  * @class
  */
@@ -50,7 +57,6 @@ export default class Authentication {
         const formData = new FormData();
         formData.append("username", username);
         formData.append("password", password);
-        this.userData = await this.getUserInfo(username, password);
         try {
             // Make a POST request to the API
             response = await fetch(apiURL, {
@@ -155,40 +161,16 @@ export default class Authentication {
     }
 
     /**
-     * Returns the profile information of a user.
-     * @param {string} username - The username of the user.
-     * @param {string} password - The password of the user.
-     * @returns {Promise<Object>} - A promise that resolves to an object containing the user's profile information.
-     */
-    async getUserInfo(username, password) {
-        const myHeaders = new Headers();
-        myHeaders.append("Accept", "application/json");
-
-        const formData = new FormData();
-        formData.append("username", username);
-        formData.append("password", password);
-
-        const requestOptions = {
-            method: "POST",
-            headers: myHeaders,
-            body: formData,
-            redirect: "follow"
-        };
-
-        const response = await fetch(`${this.apiUrl}profile`, requestOptions)
-
-        const json = await response.json();
-        window.localStorage.setItem("user", JSON.stringify(json));
-        return json;
-    }
-
-    /**
-     * Retrieves the stored user information from the local storage.
+     * Retrieves the user profile based on the logged-in state and token.
      *
-     * @returns {Object|null} The stored user information as parsed object, or null if no user information is found.
+     * @throws {Error} If the user is not logged in or the token is missing or undefined.
+     *
+     * @returns {UserProfile} The user profile obtained from decoding the token.
      */
-    getStoredUserInfo() {
-        return JSON.parse(window.localStorage.getItem("user"));
+    getUserProfile() {
+        if (!this.isLoggedIn || this.token === "" || this.token === undefined) throw new Error("User is not logged in");
+        return JSON.parse(atob(this.token));
     }
+
 
 }
