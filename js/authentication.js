@@ -47,9 +47,10 @@ export default class Authentication {
      * Login with a username and password.
      * @param {string} username - The username to login with.
      * @param {string} password - The password to login with.
+     * @param {number} expiration - The expiration time of the token in days. Default is -1 for session cookie.
      * @return {Promise<JSON>} The server's response as a JSON object.
      */
-    async login(username, password) {
+    async login(username, password, expiration = -1) {
         // Send a POST request to the API with the username and password
         const apiURL = this.apiUrl;
 
@@ -75,7 +76,7 @@ export default class Authentication {
 
         // Check if the request was successful
         if (data.success && data.token) {
-            this.generateCookies(data.token);
+            this.generateCookies(data.token, expiration);
             return data;
         } else {
             if (this.hasJQuery)
@@ -88,9 +89,10 @@ export default class Authentication {
     /**
      * Login with a token.
      * @param {string} token - The token to login with.
+     * @param {number}expiration - The expiration time of the token in days. Default is -1 for session cookie.
      * @return {Promise<JSON>} The server's response as a JSON object.
      */
-    async loginWithToken(token) {
+    async loginWithToken(token, expiration = -1) {
 
 
         const formData = new FormData();
@@ -109,7 +111,7 @@ export default class Authentication {
             if (response.ok) {
                 // The request was handled successfully
                 if (data.success) {
-                    this.generateCookies(token);
+                    this.generateCookies(token, expiration);
                 }
             } else {
                 // The request was handled with an error
@@ -149,11 +151,18 @@ export default class Authentication {
     /**
      * Generate cookies for the token.
      * @param {string} token - The token to generate cookies for.
+     * @param {number} days - The number of days to keep the cookie. Default is -1 for session cookie.
      */
-    generateCookies(token) {
-        let expire = new Date();
-        expire.setDate(expire.getDate() + 2); // 2 days
-        document.cookie = `token=${token}; path=/; domain=.${window.location.hostname}; samesite=strict; expires=${expire.toGMTString()}`;
+    generateCookies(token, days = -1) {
+        if (days <= 0) {
+            // session cookie
+            document.cookie = `token=${token}; path=/; domain=.${window.location.hostname}; samesite=strict`;
+        } else {
+            // persistent cookie for x days
+            let expire = new Date();
+            expire.setDate(expire.getDate() + days);
+            document.cookie = `token=${token}; path=/; domain=.${window.location.hostname}; samesite=strict; expires=${expire.toGMTString()}`;
+        }
         this.token = token;
         this.isLoggedIn = true;
         if (this.hasJQuery)
