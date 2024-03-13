@@ -132,10 +132,11 @@ export default class Authentication {
 
     /**
      * Login with a token stored in a cookie.
+     * @param {number} expiration - The expiration time of the token in days. Default is -1 for session cookie.
      * @return {Promise<JSON>} The server's response.
      */
-    async loginWithTokenFromCookie() {
-        return this.token == null ? false : await this.loginWithToken(this.token);
+    async loginWithTokenFromCookie(expiration = -1) {
+        return this.token == null ? false : await this.loginWithToken(this.token, expiration);
     }
 
     /**
