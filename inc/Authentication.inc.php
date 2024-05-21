@@ -45,6 +45,10 @@ class Authentication
                 $ldapBind = false;
             }
 
+            if(!$ldapBind) {
+                return false;
+            }
+
             // $password = password_hash($password, PASSWORD_DEFAULT);
             $password = hash('sha256', $password);
 
@@ -84,6 +88,26 @@ class Authentication
             // Unable to connect to Active Directory
             return false;
         }
+    }
+
+    public function register(string $username, string $password): bool|string
+    {
+        $password = hash('sha256', $password);
+        $ip = $_SERVER['REMOTE_ADDR'];
+        $user_agent = $_SERVER['HTTP_USER_AGENT'];
+        $admin = 0;
+
+        if (self::checkIfUserExistsInDatabase($username)) {
+            return false;
+        }
+
+        $sql = "INSERT INTO users (username, password, last_ip, last_user_agent, admin) VALUES (?, ?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("ssssi", $username, $password, $ip, $user_agent, $admin);
+        $stmt->execute();
+        $stmt->close();
+
+        return self::generateToken($username, $password, $ip, $user_agent, $admin);
     }
 
 
