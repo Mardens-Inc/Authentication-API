@@ -5,6 +5,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
 require './vendor/autoload.php';
+require_once "inc/Authentication.inc.php";
 
 $app = AppFactory::create();
 
@@ -44,10 +45,9 @@ $app->get("/js/minified", function (Request $request, Response $response, $args)
 });
 
 $app->post("/profile", function (Request $request, Response $response, $args) {
-    require_once "inc/Authentication.inc.php";
     $auth = new Authentication();
     $params = (array)$request->getParsedBody();
-    if(!isset($params["username"]) || !isset($params["password"])) {
+    if (!isset($params["username"]) || !isset($params["password"])) {
         $response->getBody()->write(json_encode(["success" => false, "message" => "Missing username or password."]));
         return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
     }
@@ -91,6 +91,30 @@ $app->post('/', function (Request $request, Response $response, $args) {
     }
 
     return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+});
+
+$app->post("/register", function (Request $request, Response $response, $args) {
+    $auth = new Authentication();
+    $params = (array)$request->getParsedBody();
+    if (!isset($params["username"]) || !isset($params["password"])) {
+        $response->getBody()->write(json_encode(["success" => false, "message" => "Missing username or password."]));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+    $username = @$params['username'];
+    $password = @$params['password'];
+    try {
+        $result = $auth->register($username, $password);
+        if ($result) {
+            $response->getBody()->write(json_encode(["success" => true, "message" => "Registered.", "user" => $result]));
+            return $response->withHeader('Content-Type', 'application/json');
+        } else {
+            $response->getBody()->write(json_encode(["success" => false, "message" => "Username already exists."]));
+            return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+        }
+    } catch (Exception $e) {
+        $response->getBody()->write(json_encode(["success" => false, "message" => "Failed to make request.", "error" => $e->getMessage()]));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
 });
 
 $app->run();
