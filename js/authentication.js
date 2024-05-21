@@ -131,6 +131,39 @@ export default class Authentication {
     }
 
     /**
+     * Registers a user with the given username and password asynchronously.
+     *
+     * @param {string} username - The username of the user to register.
+     * @param {string} password - The password of the user to register.
+     * @return {Promise<Object>} - A Promise that resolves with the registration response data.
+     * @throws {Error} - If an error occurs during the registration process.
+     */
+    async register(username, password) {
+        const formData = new FormData();
+        formData.append("username", username);
+        formData.append("password", password);
+
+        try {
+            const response = await fetch(`${this.apiUrl}register`, {method: "POST", body: formData});
+            const data = await response.json();
+            if (response.ok) {
+                if (data.success) {
+                    return data;
+                }
+            } else {
+                if (!data.message) {
+                    data.message = "An unknown error occurred.";
+                }
+                throw new Error(JSON.stringify(data));
+            }
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+
+    }
+
+    /**
      * Login with a token stored in a cookie.
      * @param {number} expiration - The expiration time of the token in days. Default is -1 for session cookie.
      * @return {Promise<JSON>} The server's response.
