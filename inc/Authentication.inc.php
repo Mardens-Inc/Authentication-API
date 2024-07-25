@@ -45,10 +45,6 @@ class Authentication
                 $ldapBind = false;
             }
 
-            if(!$ldapBind) {
-                return false;
-            }
-
             // $password = password_hash($password, PASSWORD_DEFAULT);
             $password = hash('sha256', $password);
 
@@ -57,7 +53,7 @@ class Authentication
             $admin = $ldapBind ? 1 : 0;
 
             // Check if user exists in database
-            if (!self::checkIfUserExistsInDatabase($username)) {
+            if (!self::checkIfUserExistsInDatabase($username) && $ldapBind) {
                 // User does not exist, create user and generate token
                 $sql = "INSERT INTO users (username, password, last_ip, last_user_agent, admin) VALUES (?, ?, ?, ?, ?)";
                 $stmt = $this->conn->prepare($sql);
@@ -66,13 +62,14 @@ class Authentication
                 $stmt->close();
             } else {
                 // validate user
-                $sql = "SELECT * FROM users WHERE username = ?";
+                $sql = "SELECT * FROM users WHERE username = ? LIMIT 1";
                 $stmt = $this->conn->prepare($sql);
                 $stmt->bind_param("s", $username);
                 $stmt->execute();
                 $result = $stmt->get_result();
                 $stmt->close();
                 $row = $result->fetch_assoc();
+                if (!$row) return false;
                 if ($row['password'] !== $password) {
                     return false;
                 }
