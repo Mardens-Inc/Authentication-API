@@ -35,13 +35,16 @@ class Authentication
         ldap_set_option($ldapConn, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($ldapConn, LDAP_OPT_REFERRALS, 0);
 
-        if ($ldapConn) {
-            try {
+        if ($ldapConn)
+        {
+            try
+            {
                 // Bind to Active Directory using the provided username and password
                 $ldapBind = @ldap_bind($ldapConn, $ldapUsername, $password);
                 // Authentication successful
                 ldap_unbind($ldapConn);
-            } catch (Exception $e) {
+            } catch (Exception $e)
+            {
                 $ldapBind = false;
             }
 
@@ -50,17 +53,19 @@ class Authentication
 
             $ip = $_SERVER['REMOTE_ADDR'];
             $user_agent = $_SERVER['HTTP_USER_AGENT'];
-            $admin = $ldapBind ? 1 : 0;
+            $admin = 0;
 
             // Check if user exists in database
-            if (!self::checkIfUserExistsInDatabase($username) && $ldapBind) {
+            if (!self::checkIfUserExistsInDatabase($username) && $ldapBind)
+            {
                 // User does not exist, create user and generate token
                 $sql = "INSERT INTO users (username, password, last_ip, last_user_agent, admin) VALUES (?, ?, ?, ?, ?)";
                 $stmt = $this->conn->prepare($sql);
                 $stmt->bind_param("ssssi", $username, $password, $ip, $user_agent, $admin);
                 $stmt->execute();
                 $stmt->close();
-            } else {
+            } else
+            {
                 // validate user
                 $sql = "SELECT * FROM users WHERE username = ? LIMIT 1";
                 $stmt = $this->conn->prepare($sql);
@@ -70,7 +75,8 @@ class Authentication
                 $stmt->close();
                 $row = $result->fetch_assoc();
                 if (!$row) return false;
-                if ($row['password'] !== $password) {
+                if ($row['password'] !== $password)
+                {
                     return false;
                 }
                 // update last_online, last_ip, last_user_agent
@@ -78,10 +84,12 @@ class Authentication
                 $stmt = $this->conn->prepare($sql);
                 $stmt->bind_param("sss", $ip, $user_agent, $username);
                 $stmt->execute();
+                $admin = $row['admin'] == 1;
             }
 
             return self::generateToken($username, $password, $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT'], $admin);
-        } else {
+        } else
+        {
             // Unable to connect to Active Directory
             return false;
         }
@@ -94,7 +102,8 @@ class Authentication
         $user_agent = $_SERVER['HTTP_USER_AGENT'];
         $admin = 0;
 
-        if (self::checkIfUserExistsInDatabase($username)) {
+        if (self::checkIfUserExistsInDatabase($username))
+        {
             return false;
         }
 
@@ -111,12 +120,14 @@ class Authentication
     public function loginWithToken(string $token): bool
     {
 
-        try {
+        try
+        {
 
             // decode uri component
             $token = urldecode($token);
             $decoded_token = json_decode(base64_decode($token), true);
-            if (!isset($decoded_token['username'])) {
+            if (!isset($decoded_token['username']))
+            {
                 return false;
             }
             $username = $decoded_token['username'];
@@ -127,12 +138,14 @@ class Authentication
             $stmt->execute();
             $result = $stmt->get_result();
             $stmt->close();
-            if ($result->num_rows > 0) {
+            if ($result->num_rows > 0)
+            {
                 $row = $result->fetch_assoc();
                 $password = $row['password'];
                 $ip = $_SERVER['REMOTE_ADDR'];
                 $user_agent = $_SERVER['HTTP_USER_AGENT'];
-                if (self::validate($username, $password, $ip, $user_agent, $admin, $token)) {
+                if (self::validate($username, $password, $ip, $user_agent, $admin, $token))
+                {
 
                     $sql = "UPDATE users SET last_online = CURRENT_TIMESTAMP, last_ip = ?, last_user_agent = ? WHERE username = ?";
                     $stmt = $this->conn->prepare($sql);
@@ -142,7 +155,8 @@ class Authentication
                     return true;
                 }
             }
-        } catch (Exception) {
+        } catch (Exception)
+        {
             return false;
         }
         return false;
@@ -197,22 +211,27 @@ class Authentication
         ldap_set_option($ldapConn, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($ldapConn, LDAP_OPT_REFERRALS, 0);
 
-        if ($ldapConn) {
-            try {
+        if ($ldapConn)
+        {
+            try
+            {
                 // Bind to Active Directory using the provided username and password
                 $ldapBind = @ldap_bind($ldapConn, $ldapUsername, $password);
-            } catch (Exception $e) {
+            } catch (Exception $e)
+            {
                 $ldapBind = false;
             }
 
-            if ($ldapBind) {
+            if ($ldapBind)
+            {
                 // Search AD for the user's details
                 $searchFilter = "(samaccountname=$username)";
                 $searchAttributes = array("displayName", "mail", "memberOf");
                 $searchResults = ldap_search($ldapConn, "DC=mss,DC=local", $searchFilter, $searchAttributes);
                 $userDetails = [];
 
-                if ($searchResults) {
+                if ($searchResults)
+                {
                     $entry = ldap_first_entry($ldapConn, $searchResults);
                     $userDetails = ldap_get_attributes($ldapConn, $entry); // This will contain user's details
                     unset($userDetails["count"]); // Remove the 'count' element from the results
@@ -228,16 +247,20 @@ class Authentication
 
                 // loop through the memberOf array and remove the count element and format the array
                 $memberOf = [];
-                foreach ($userDetails["memberOf"] as $key => $group) {
-                    if ($key !== "count") {
+                foreach ($userDetails["memberOf"] as $key => $group)
+                {
+                    if ($key !== "count")
+                    {
                         $groupData = explode(",", $group);
                         $groupSize = count($groupData);
                         $groupDetails = [];
-                        for ($i = 0; $i < $groupSize; $i++) {
+                        for ($i = 0; $i < $groupSize; $i++)
+                        {
                             $groupParts = explode("=", $groupData[$i]);
                             $groupKey = $groupParts[0];
                             $groupValue = $groupParts[1] ?? null; // prevent errors when there's no second element
-                            switch ($groupKey) {
+                            switch ($groupKey)
+                            {
                                 case "CN":
                                     $groupDetails["Group"] = $groupValue;
                                     break;
@@ -256,12 +279,14 @@ class Authentication
                 $userDetails["memberOf"] = $memberOf;
 
                 return $userDetails; // Convert array to JSON and return
-            } else {
+            } else
+            {
                 // Authentication failed
                 ldap_unbind($ldapConn);
                 return false;
             }
-        } else {
+        } else
+        {
             // Unable to connect to Active Directory
             return false;
         }
